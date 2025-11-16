@@ -21,6 +21,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.blockycraft.blockydeposit.lang.LanguageManager;
+import com.blockycraft.blockydeposit.geoip.GeoIPManager;
+
 public class BlockyDeposit extends JavaPlugin {
 
     private static final Logger LOG = Logger.getLogger("Minecraft");
@@ -28,6 +31,8 @@ public class BlockyDeposit extends JavaPlugin {
 
     private Properties cfg = new Properties();
     private File dataDir;
+    private LanguageManager languageManager;
+    private GeoIPManager geoIPManager;
 
     // --- NEW ---
     private File factionsDir;
@@ -43,6 +48,10 @@ public class BlockyDeposit extends JavaPlugin {
     public void onEnable() {
         dataDir = getDataFolder();
         if (!dataDir.exists()) dataDir.mkdirs();
+
+        // Initialize managers
+        languageManager = new LanguageManager(this);
+        geoIPManager = new GeoIPManager();
         
         // --- NEW ---
         // Locate the BlockyFactions directory
@@ -62,6 +71,14 @@ public class BlockyDeposit extends JavaPlugin {
     @Override
     public void onDisable() {
         LOG.info("[Depositar] desativado.");
+    }
+
+    public LanguageManager getLanguageManager() {
+        return languageManager;
+    }
+
+    public GeoIPManager getGeoIPManager() {
+        return geoIPManager;
     }
 
     // --- NEW ---
