@@ -1,0 +1,29 @@
+name: Deposit
+main: com.blockycraft.blockydeposit.BlockyDeposit
+version: 1.2
+author: Blocky
+commands:
+  depositar:
+    description: Realiza o deposito de items para a bolsa.
+
+    usage: /<command> [fundo] | /<command> tudo [fundo] | /<command> tudo mao [fundo]
+
+    aliases: [deposit]
+
+    permission: deposit.depositar
+
+    permission-message: Voce nao tem permissao para usar esse comando.
+permissions:
+  # O nome da permissão base (com 'i')
+  deposit.depositar:
+    description: Permite usar o comando para depositar.
+    default: true
+  deposit.depositar.tudo:
+    description: Permite usar o argumento 'tudo' para depositar.
+    default: true
+  deposit.depositar.mao:
+    description: Permite usar o argumento 'mao' para depositar.
+    default: true
+  deposit.depositar.fundo:
+    description: Permite usar o argumento 'fundo' para depositar.
+    default: true
