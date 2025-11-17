@@ -27,3 +27,5 @@ permissions:
   deposit.depositar.fundo:
     description: Permite usar o argumento 'fundo' para depositar.
     default: true
+softdepend:
+  - BlockyGeoIP
