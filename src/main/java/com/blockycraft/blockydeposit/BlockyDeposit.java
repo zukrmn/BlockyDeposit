@@ -31,7 +31,7 @@ public class BlockyDeposit extends JavaPlugin {
     private LanguageManager languageManager;
     private GeoIPManager geoIPManager;
 
-    private File factionsDir;
+    private File groupsDir;
     private final Yaml yaml = new Yaml();
 
     private String filterMode = "exclusive"; // inclusive | exclusive
@@ -47,11 +47,11 @@ public class BlockyDeposit extends JavaPlugin {
         languageManager = new LanguageManager(this);
         geoIPManager = new GeoIPManager();
 
-        factionsDir = new File("plugins/BlockyFactions/factions");
-        if (!factionsDir.exists() || !factionsDir.isDirectory()) {
-            LOG.warning("[Depositar] Diretorio das faccoes nao encontrado em: " + factionsDir.getPath());
+        groupsDir = new File("plugins/BlockyGroups/groups");
+        if (!groupsDir.exists() || !groupsDir.isDirectory()) {
+            LOG.warning("[Depositar] Diretorio dos grupo nao encontrado em: " + groupsDir.getPath());
             LOG.warning("[Depositar] A funcionalidade de deposito para fundo sera desativada.");
-            factionsDir = null;
+            groupsDir = null;
         }
 
         loadConfigProps();
@@ -72,22 +72,22 @@ public class BlockyDeposit extends JavaPlugin {
         return geoIPManager;
     }
 
-    private static class FactionCheckResult {
+    private static class GroupCheckResult {
         final boolean canDeposit;
         final String message;
-        final String factionName;
+        final String groupName;
         final String treasurer;
-        FactionCheckResult(boolean can, String msg, String name, String tres) {
+        GroupCheckResult(boolean can, String msg, String name, String tres) {
             this.canDeposit = can;
             this.message = msg;
-            this.factionName = name;
+            this.groupName = name;
             this.treasurer = tres;
         }
-        static FactionCheckResult fail(String msg) {
-            return new FactionCheckResult(false, msg, "", "");
+        static GroupCheckResult fail(String msg) {
+            return new GroupCheckResult(false, msg, "", "");
         }
-        static FactionCheckResult success(String name, String tres) {
-            return new FactionCheckResult(true, "", name, tres);
+        static GroupCheckResult success(String name, String tres) {
+            return new GroupCheckResult(true, "", name, tres);
         }
     }
 
@@ -114,7 +114,7 @@ public class BlockyDeposit extends JavaPlugin {
         boolean isHand = false;
         boolean isFund = false;
         String fundTreasurer = "";
-        String fundFactionName = "";
+        String fundGroupName = "";
 
         List<String> argsList = new ArrayList<String>(Arrays.asList(args));
 
@@ -154,21 +154,21 @@ public class BlockyDeposit extends JavaPlugin {
         }
 
         if (isFund) {
-            if (factionsDir == null) {
-                p.sendMessage(ChatColor.RED + languageManager.get(lang, "deposit.no_faction_dir"));
+            if (groupsDir == null) {
+                p.sendMessage(ChatColor.RED + languageManager.get(lang, "deposit.no_group_dir"));
                 return true;
             }
             try {
-                FactionCheckResult check = checkFactionFund(p.getName());
+                GroupCheckResult check = checkGroupFund(p.getName());
                 if (!check.canDeposit) {
                     p.sendMessage(ChatColor.RED + check.message);
                     return true;
                 }
                 fundTreasurer = check.treasurer;
-                fundFactionName = check.factionName; 
+                fundGroupName = check.groupName; 
             } catch (Exception e) {
-                p.sendMessage(ChatColor.RED + languageManager.get(lang, "deposit.faction_error"));
-                LOG.warning("[Depositar] Check de faccao falhou para " + p.getName() + ": " + e.getMessage());
+                p.sendMessage(ChatColor.RED + languageManager.get(lang, "deposit.group_error"));
+                LOG.warning("[Depositar] Check de grupo falhou para " + p.getName() + ": " + e.getMessage());
                 e.printStackTrace();
                 return true;
             }
@@ -216,7 +216,7 @@ public class BlockyDeposit extends JavaPlugin {
         final int[] slotsToClear = coll.slots;
         final int stacks = coll.totalStacks;
         final boolean finalIsFund = isFund;
-        final String finalFundFactionName = fundFactionName;
+        final String finalFundGroupName = fundGroupName;
 
         if ("http".equalsIgnoreCase(getMode())) {
             final String endpoint = cfg.getProperty("endpoint_url", "").trim();
@@ -229,7 +229,7 @@ public class BlockyDeposit extends JavaPlugin {
 
             String pendingMsg = languageManager.get(lang, "deposit.submitting");
             if (finalIsFund) {
-                pendingMsg = languageManager.get(lang, "deposit.pending_fund").replace("{faction}", finalFundFactionName);
+                pendingMsg = languageManager.get(lang, "deposit.pending_fund").replace("{group}", finalFundGroupName);
             }
             p.sendMessage(ChatColor.YELLOW + pendingMsg);
 
@@ -244,7 +244,7 @@ public class BlockyDeposit extends JavaPlugin {
                                     .replace("{stacks}", "" + stacks);
                                 if (finalIsFund) {
                                     msg = msg + " " + languageManager.get(lang, "deposit.success_fund")
-                                        .replace("{faction}", finalFundFactionName);
+                                        .replace("{group}", finalFundGroupName);
                                 }
                                 p.sendMessage(ChatColor.GREEN + msg);
                             }
@@ -268,7 +268,7 @@ public class BlockyDeposit extends JavaPlugin {
                     .replace("{stacks}", "" + stacks);
                 if (finalIsFund)
                     msg = msg + " " + languageManager.get(lang, "deposit.success_fund")
-                        .replace("{faction}", finalFundFactionName);
+                        .replace("{group}", finalFundGroupName);
                 p.sendMessage(ChatColor.GREEN + msg);
 
             } catch (Exception e) {
@@ -549,17 +549,17 @@ public class BlockyDeposit extends JavaPlugin {
             return "";
         }
     }
-    private FactionCheckResult checkFactionFund(String playerName) {
-        if (factionsDir == null || !factionsDir.isDirectory()) {
-            return FactionCheckResult.fail("Faction data not loaded.");
+    private GroupCheckResult checkGroupFund(String playerName) {
+        if (groupsDir == null || !groupsDir.isDirectory()) {
+            return GroupCheckResult.fail("Group data not loaded.");
         }
-        File[] files = factionsDir.listFiles(new FilenameFilter() {
+        File[] files = groupsDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith(".yml");
             }
         });
         if (files == null) {
-            return FactionCheckResult.fail("Could not read faction directory.");
+            return GroupCheckResult.fail("Could not read group directory.");
         }
         for (File file : files) {
             try {
@@ -570,8 +570,8 @@ public class BlockyDeposit extends JavaPlugin {
 
                 if (data == null) continue;
 
-                String factionName = (String) data.get("nome");
-                if (factionName == null || factionName.isEmpty()) factionName = file.getName().replace(".yml","");
+                String groupName = (String) data.get("nome");
+                if (groupName == null || groupName.isEmpty()) groupName = file.getName().replace(".yml","");
 
                 boolean isMember = false;
                 Object lider = data.get("lider");
@@ -606,15 +606,15 @@ public class BlockyDeposit extends JavaPlugin {
                     Object tesoureiroObj = data.get("tesoureiro");
                     String tesoureiro = (tesoureiroObj == null) ? "" : tesoureiroObj.toString().trim();
                     if (tesoureiro.isEmpty()) {
-                        return FactionCheckResult.fail("Nao ha tesoureiro definido para essa faccao " + factionName);
+                        return GroupCheckResult.fail("Nao ha tesoureiro definido para essa grupo " + groupName);
                     }
-                    return FactionCheckResult.success(factionName, tesoureiro);
+                    return GroupCheckResult.success(groupName, tesoureiro);
                 }
             } catch (Exception e) {
-                LOG.warning("[Depositar] Falha ao processar o arquivo da faccao: " + file.getName() + ": " + e.getMessage());
+                LOG.warning("[Depositar] Falha ao processar o arquivo do grupo: " + file.getName() + ": " + e.getMessage());
             }
         }
-        return FactionCheckResult.fail("Voce nao faz parte de nenhuma faccao, nao eh possivel depositar no fundo da faccao.");
+        return GroupCheckResult.fail("Voce nao faz parte de nenhum grupo, nao eh possivel depositar no fundo do grupo.");
     }
 }
 
