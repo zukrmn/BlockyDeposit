@@ -97,7 +97,7 @@ public class BlockyDeposit extends JavaPlugin {
             return false;
         }
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "Apenas jogadores podem usar esse comando.");
+            sender.sendMessage(ChatColor.RED + languageManager.get("en", "error.not_a_player"));
             return true;
         }
 
@@ -159,7 +159,7 @@ public class BlockyDeposit extends JavaPlugin {
                 return true;
             }
             try {
-                GroupCheckResult check = checkGroupFund(p.getName());
+                GroupCheckResult check = checkGroupFund(p.getName(), lang);
                 if (!check.canDeposit) {
                     p.sendMessage(ChatColor.RED + check.message);
                     return true;
@@ -549,9 +549,9 @@ public class BlockyDeposit extends JavaPlugin {
             return "";
         }
     }
-    private GroupCheckResult checkGroupFund(String playerName) {
+    private GroupCheckResult checkGroupFund(String playerName, String lang) {
         if (groupsDir == null || !groupsDir.isDirectory()) {
-            return GroupCheckResult.fail("Group data not loaded.");
+            return GroupCheckResult.fail(languageManager.get(lang, "error.group_data_not_loaded"));
         }
         File[] files = groupsDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -559,7 +559,7 @@ public class BlockyDeposit extends JavaPlugin {
             }
         });
         if (files == null) {
-            return GroupCheckResult.fail("Could not read group directory.");
+            return GroupCheckResult.fail(languageManager.get(lang, "error.group_dir_read_fail"));
         }
         for (File file : files) {
             try {
@@ -606,7 +606,7 @@ public class BlockyDeposit extends JavaPlugin {
                     Object tesoureiroObj = data.get("tesoureiro");
                     String tesoureiro = (tesoureiroObj == null) ? "" : tesoureiroObj.toString().trim();
                     if (tesoureiro.isEmpty()) {
-                        return GroupCheckResult.fail("Nao ha tesoureiro definido para essa grupo " + groupName);
+                        return GroupCheckResult.fail(languageManager.get(lang, "error.no_treasurer_defined").replace("{group_name}", groupName));
                     }
                     return GroupCheckResult.success(groupName, tesoureiro);
                 }
@@ -614,7 +614,7 @@ public class BlockyDeposit extends JavaPlugin {
                 LOG.warning("[Depositar] Falha ao processar o arquivo do grupo: " + file.getName() + ": " + e.getMessage());
             }
         }
-        return GroupCheckResult.fail("Voce nao faz parte de nenhum grupo, nao eh possivel depositar no fundo do grupo.");
+        return GroupCheckResult.fail(languageManager.get(lang, "error.not_in_group_fund"));
     }
 }
 
