@@ -29,16 +29,14 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.3-beta</version>
-            <scope>system</scope>
-            <systemPath>${minecraft.server.path}/server.jar</systemPath>
+            <version>1.7.3-beta-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.blockycraft</groupId>
             <artifactId>blockygeoip</artifactId>
             <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${minecraft.server.path}/plugins/BlockyGeoIP.jar</systemPath>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -49,6 +47,22 @@
         
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.4.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.3</version>
+                </plugin>
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
